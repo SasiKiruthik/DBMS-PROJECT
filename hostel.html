@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Dashboard</title>
+    <link rel="icon" href="images/Logo.jpg">
+    <link rel="stylesheet" href="hostel.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">AskNFix</div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="Homepage.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=asknfix147@gmail.com" target="_blank">Contact</a></li>
+            </ul>
+            <div class="hamburger" onclick="toggleMenu()">☰</div>
+        </nav>
+    </header>
+
+    <main style="margin-left: 20px;">
+        <h2>Welcome to Your Dashboard</h2>
+
+        <p><strong>Roll Number:</strong> <span id="displayRollNo"></span></p>
+        <p><strong>Name:</strong> <span id="displayName"></span></p>
+        <p><strong>Residing Status:</strong> <span id="displayResidingStatus"></span></p>
+        <p><strong>Room Number:</strong> <span id="displayRoomNo"></span></p>
+
+        <h3>Roommates:</h3>
+        <ul id="roommatesList"></ul>
+
+        <h3>Appliances in Room:</h3>
+        <ul id="applianceList"></ul>
+    </main>
+
+    <footer>
+        <p>Contact us: support@asknfix.com | Phone: +123 456 7890</p>
+        <hr>
+        <p>AskNFix is an innovative web application designed to streamline record-keeping and issue resolution for students and administrators. Whether it’s managing hostel accommodations, college records, or tracking KP appliances, this platform ensures seamless operations and effective communication.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("show");
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const storedUser = localStorage.getItem("user");
+
+            if (!storedUser) {
+                alert("Unauthorized access! Please login again.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const user = JSON.parse(storedUser);
+            console.log("User data on dashboard:", user);
+
+            document.getElementById("displayRollNo").textContent = user.rollno || "N/A";
+            document.getElementById("displayName").textContent = user.name || "N/A";
+            document.getElementById("displayResidingStatus").textContent = user.residing_status || "N/A";
+            document.getElementById("displayRoomNo").textContent = user.roomno || "Not assigned";
+
+            // Roommates
+            if (user.residing_status === "Hosteller") {
+                const storedRoommates = localStorage.getItem("roommates");
+                const roommates = storedRoommates ? JSON.parse(storedRoommates) : [];
+
+                console.log("Roommates data on dashboard:", roommates);
+
+                if (Array.isArray(roommates) && roommates.length > 0) {
+                    displayRoommates(roommates);
+                } else {
+                    document.getElementById("roommatesList").innerHTML = '<li>No roommates assigned.</li>';
+                }
+            } else {
+                document.getElementById("roommatesList").innerHTML = '<li>Not applicable (Day Scholar).</li>';
+            }
+
+            // Appliances
+const storedAppliances = localStorage.getItem("appliances");
+const applianceList = document.getElementById("applianceList");
+
+if (storedAppliances) {
+    const appliances = JSON.parse(storedAppliances);
+    if (Array.isArray(appliances) && appliances.length > 0) {
+        applianceList.innerHTML = "";
+        appliances.forEach((appliance, index) => {
+            const li = document.createElement("li");
+
+            // Create appliance name label
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = `${appliance.name} (x${appliance.count}) `;
+
+
+            // Create - button
+            const minusBtn = document.createElement("button");
+            minusBtn.textContent = "-";
+            minusBtn.onclick = () => {
+                let value = parseInt(input.value);
+                if (value > 0) input.value = value - 1;
+            };
+
+            // Create input field
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = "0";
+            input.readOnly = true;
+            input.style.width = "30px";
+            input.style.textAlign = "center";
+            input.id = `appliance-count-${index}`;
+
+            // Create + button
+            const plusBtn = document.createElement("button");
+            plusBtn.textContent = "+";
+            plusBtn.onclick = () => {
+                let value = parseInt(input.value);
+                if (value < appliance.count) input.value = value + 1;
+            };
+
+            // Append everything
+            li.appendChild(nameSpan);
+            li.appendChild(minusBtn);
+            li.appendChild(input);
+            li.appendChild(plusBtn);
+
+            applianceList.appendChild(li);
+        });
+    } else {
+        applianceList.innerHTML = "<li>No appliances found.</li>";
+    }
+} else {
+    applianceList.innerHTML = "<li>No appliances assigned.</li>";
+}
+
+        });
+
+        function displayRoommates(roommates) {
+            const roommatesList = document.getElementById('roommatesList');
+            roommatesList.innerHTML = '';
+
+            roommates.forEach(rm => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${rm.NAME} (${rm.ROLLNO})</strong> - ${rm.RESIDING_STATUS}`;
+                roommatesList.appendChild(li);
+            });
+        }
+    </script>
+
+</body>
+</html>
