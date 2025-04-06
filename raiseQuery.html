@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raise Query</title>
+    <link rel="icon" href="images/Logo.jpg">
+    <link rel="stylesheet" href="raiseQuery.css">
+    <style>
+        /* Optional: Add some basic styling for the button spacing */
+        .form-actions {
+            margin-top: 15px;
+        }
+        .form-actions button {
+            margin-right: 10px; /* Add space between buttons */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">AskNFix</div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="Homepage.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=asknfix147@gmail.com" target="_blank">Contact</a></li>
+        </ul>
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+    </nav>
+</header>
+
+<main style="margin-left: 20px;">
+    <form id="queryForm">
+        <h2>Raise a Query</h2>
+
+        <h3>Selected Faulty Appliances:</h3>
+        <ul id="selectedApplianceList">
+            <li>Loading selected appliances...</li>
+        </ul>
+
+        <h3>Describe the Issue:</h3>
+        <textarea id="issueDescription" rows="5" placeholder="Describe the problem in detail..."></textarea><br><br>
+
+        <div class="form-actions">
+            <button type="button" id="changeAppliancesButton">Back</button>
+
+            <button type="submit">Submit Query</button>
+        </div>
+    </form>
+</main>
+
+<footer>
+    <p>Contact us: support@asknfix.com | Phone: +123 456 7890</p>
+    <hr>
+    <p>AskNFix is an innovative web application designed to streamline record-keeping and issue resolution for students and administrators. Whether it’s managing hostel accommodations, college records, or tracking KP appliances, this platform ensures seamless operations and effective communication.</p>
+</footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const queryForm = document.getElementById("queryForm");
+        const selectedApplianceList = document.getElementById("selectedApplianceList");
+        const issueDescriptionInput = document.getElementById("issueDescription");
+        const changeAppliancesButton = document.getElementById("changeAppliancesButton");
+
+        // --- Function to populate the list ---
+        function populateApplianceList() {
+            const storedAppliances = JSON.parse(localStorage.getItem("appliances")); // Get appliances passed
+
+            if (selectedApplianceList && storedAppliances && Array.isArray(storedAppliances)) {
+                selectedApplianceList.innerHTML = ''; // Clear previous list items
+                if (storedAppliances.length === 0) {
+                    selectedApplianceList.innerHTML = "<li>No appliances selected or passed from the previous page. Cannot submit query.</li>";
+                    const submitButton = queryForm.querySelector('button[type="submit"]');
+                    if (submitButton) submitButton.disabled = true;
+                    return;
+                }
+                storedAppliances.forEach(appliance => {
+                    // **Crucial Check**: Ensure each appliance has an appliance_id
+                    if (typeof appliance.appliance_id === 'undefined' || appliance.appliance_id === null) {
+                        console.error("Error: Appliance data missing appliance_id:", appliance);
+                        const errorItem = document.createElement("li");
+                        errorItem.textContent = `Error: Invalid data for appliance "${appliance.name || 'Unknown'}". Please go back and re-select.`;
+                        errorItem.style.color = 'red';
+                        selectedApplianceList.appendChild(errorItem);
+                        const submitButton = queryForm.querySelector('button[type="submit"]');
+                        if (submitButton) submitButton.disabled = true;
+                        return; // Stop processing this appliance
+                    }
+
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${appliance.name} (x${appliance.count})`;
+                    selectedApplianceList.appendChild(listItem);
+                });
+
+            } else if (!storedAppliances) {
+                console.warn("No appliances found in localStorage to display.");
+                if (selectedApplianceList) {
+                    selectedApplianceList.innerHTML = "<li>No appliances selected or passed from the previous page. Cannot submit query.</li>";
+                }
+                if(queryForm){
+                    const submitButton = queryForm.querySelector('button[type="submit"]');
+                    if (submitButton) submitButton.disabled = true;
+                }
+
+            } else {
+                if (selectedApplianceList) {
+                    selectedApplianceList.innerHTML = "<li>Error loading appliance data.</li>";
+                }
+                if(queryForm){
+                    const submitButton = queryForm.querySelector('button[type="submit"]');
+                    if (submitButton) submitButton.disabled = true;
+                }
+            }
+        }
+
+        // --- Populate the list on load ---
+        populateApplianceList();
+
+
+        // --- Attach submit listener ---
+        if (queryForm) {
+            const submitButton = queryForm.querySelector('button[type="submit"]');
+
+            queryForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const description = issueDescriptionInput.value.trim();
+                const user = JSON.parse(localStorage.getItem("user"));
+                const storedAppliances = JSON.parse(localStorage.getItem("appliances"));
+
+                // --- Validation ---
+                if (!user || !user.rollno || !user.roomno) {
+                    alert("User information missing. Please login again.");
+                    window.location.href = 'login.html';
+                    return;
+                }
+                if (!description) {
+                    alert("Please describe the issue.");
+                    return;
+                }
+                if (!storedAppliances || !Array.isArray(storedAppliances) || storedAppliances.length === 0) {
+                    alert("No appliances selected to report.");
+                    return;
+                }
+                const invalidAppliance = storedAppliances.find(app => typeof app.appliance_id === 'undefined' || app.appliance_id === null);
+                if (invalidAppliance) {
+                    alert("Invalid appliance data. Please go back and re-select.");
+                    return;
+                }
+
+
+                // --- Construct applianceListPayload ---
+                const applianceListPayload = storedAppliances.map((appliance) => ({
+                    appliance_id: appliance.appliance_id,
+                    count: appliance.count
+                }));
+
+
+                // --- Fetch logic ---
+                try {
+                    if (submitButton) submitButton.disabled = true;
+                    if (changeAppliancesButton) changeAppliancesButton.disabled = true;
+
+                    const response = await fetch("http://localhost:3000/submitQuery", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include",
+                        body: JSON.stringify({
+                            rollno: user.rollno,
+                            roomno: user.roomno,
+                            description: description,
+                            appliances: applianceListPayload
+                        })
+                    });
+
+                    const data = await response.json();
+                    console.log("Server Response:", data);
+                    console.log("Response Status:", response.status);
+
+                    // --- SUCCESS LOGIC ---
+                    if (response.ok && data.success) {
+                        // **Corrected Logic:** Update the user object in localStorage with the one received from the server
+                        localStorage.setItem("user", JSON.stringify(data.user));
+                        console.log("Updated user data in localStorage:", data.user);
+
+                        // Clear the temporary faulty appliances list
+                        localStorage.removeItem("appliances");
+
+                        // Notify user
+                        alert("Query submitted successfully!");
+
+                        // Redirect to Homepage.html (or hostel.html if preferred)
+                        window.location.href = 'Homepage.html'; // Or change to 'hostel.html'
+
+                    // --- FAILURE LOGIC ---
+                    } else {
+                        let alertMessage = `Failed to submit query: ${data.message || `Server responded with status ${response.status}`}`;
+                        if (response.status === 409) {
+                            console.warn("Duplicate query detected by server.");
+                            alertMessage = data.message;
+                        }
+                        alert(alertMessage);
+                        // Re-enable buttons on failure
+                        if (submitButton) submitButton.disabled = false;
+                        if (changeAppliancesButton) changeAppliancesButton.disabled = false;
+                    }
+                // --- CATCH ERROR LOGIC ---
+                } catch (error) {
+                    console.error("Network or fetch error submitting query:", error);
+                    alert("An error occurred while trying to submit the query. Please check your network connection or try again later.");
+                    // Re-enable buttons on catch error
+                    if (submitButton) submitButton.disabled = false;
+                    if (changeAppliancesButton) changeAppliancesButton.disabled = false;
+                }
+            }); // End submit event listener
+        } else {
+            console.error("Form with ID 'queryForm' not found.");
+        }
+
+        // --- Attach event listener to the back button ---
+        if (changeAppliancesButton) {
+            changeAppliancesButton.addEventListener('click', () => {
+                window.history.back();
+            });
+        } else {
+            console.error("Button with ID 'changeAppliancesButton' not found.");
+        }
+
+    }); // End DOMContentLoaded
+
+    function toggleMenu() {
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks) {
+            navLinks.classList.toggle('active');
+        }
+    }
+</script>
+</body>
+</html>
