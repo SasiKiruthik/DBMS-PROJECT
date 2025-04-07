@@ -5,17 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AskNFix</title>
     <link rel="icon" href="images/Logo.jpg">
-    <link rel="stylesheet" href="kphome.css">
+    <link rel="stylesheet" href="kpff.css">
 </head>
 <body>
-
     <header>
-        <div class="logo">KP BUILDING</div>
+        <div class="logo">KP BUILDING-FIRST FLOOR</div>
         <nav>
             <ul class="nav-links">
                 <li><a class="hreff">Home</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=asknfix147@gmail.com" target="_blank">Contact</a></li>
+                <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=asknfix147@gmail.com">Contact</a></li>
                 <li><a href="login.html">Logout</a></li>
             </ul>
             <div class="hamburger" onclick="toggleMenu()">☰</div>
@@ -23,22 +22,20 @@
     </header>
 
     <section class="buttons">
-        <a href="kpff.html">
-            <button class="large-btn gp">FIRST FLOOR</button>
-        </a>
-        <a href="kpsf.html">
-            <button class="large-btn fs">SECOND FLOOR</button>
-        </a>
-        <a href="kptf.html">
-            <button class="large-btn sf">THIRD FLOOR</button>
-        </a>
-        <a href="kp4f.html">
-            <button class="large-btn tf">FOURTH FLOOR</button>
-        </a>
+        <a href="kpquery.html" onclick="f1(101)"><button class="large-btn sf">101</button></a>
+        <a href="kpquery.html" onclick="f1(102)"><button class="large-btn fs">102</button></a>
+        <a href="kpquery.html" onclick="f1(103)"><button class="large-btn sf">103</button></a>
+        <a href="kpquery.html" onclick="f1(104)"><button class="large-btn fs">104</button></a>
+        <a href="kpquery.html" onclick="f1(105)"><button class="large-btn sf">105</button></a>
+        <a href="kpquery.html" onclick="f1(106)"><button class="large-btn fs">106</button></a>
+        <a href="kpquery.html" onclick="f1(107)"><button class="large-btn sf">107</button></a>
+        <a href="kpquery.html" onclick="f1(108)"><button class="large-btn fs">108</button></a>
+        <a href="kpquery.html" onclick="f1(109)"><button class="large-btn sf">109</button></a>
+        <a href="kpquery.html" onclick="f1(110)"><button class="large-btn fs">110</button></a>
     </section>
 
     <footer>
-        <p >Contact us: support@asknfix.com | Phone: +123 456 7890<br><hr>
+        <p >Contact us: support@asknfix.com | Phone: +7397247862<br><hr>
             AskNFix is an innovative web application designed to streamline record-keeping and issue resolution for students and administrators. Whether it’s managing hostel accommodations, college records, or tracking KP appliances, this platform ensures seamless operations and effective communication</p>
     </footer>
 
@@ -54,6 +51,9 @@
          else
         window.location.href = "Homepage1.html";
         });
+        function f1(roomno) {
+            localStorage.setItem("kproomno", roomno);
+        }
     </script>
 
 </body>

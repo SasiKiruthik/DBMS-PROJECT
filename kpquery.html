@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Dashboard</title>
+    <link rel="icon" href="images/Logo.jpg">
+    <link rel="stylesheet" href="hostel.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">AskNFix</div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="Homepage.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=asknfix147@gmail.com" target="_blank">Contact</a></li>
+            </ul>
+            <div class="hamburger" onclick="toggleMenu()">☰</div>
+        </nav>
+    </header>
+
+    <main style="margin-left: 20px;">
+        <h2>Welcome to Your Dashboard</h2>
+
+        <p><strong>Roll Number:</strong> <span id="displayRollNo"></span></p>
+        <p><strong>Name:</strong> <span id="displayName"></span></p>
+        <p><strong>Residing Status:</strong> <span id="displayResidingStatus"></span></p>
+        <p><strong>Room Number:</strong> <span id="displayRoomNo"></span></p>
+
+       <!--<h3>Roommates:</h3>
+        <ul id="roommatesList"></ul>-->
+
+        <h3>Select Faulty Appliances:</h3>
+        <ul id="applianceList"></ul>
+        <button id="querybtn" onclick="submitFaultyAppliances()">Raise Query</button>
+
+    </main>
+
+    <footer>
+        <p>Contact us: support@asknfix.com | Phone: +123 456 7890</p>
+        <hr>
+        <p>AskNFix is an innovative web application designed to streamline record-keeping and issue resolution for students and administrators. Whether it’s managing hostel accommodations, college records, or tracking KP appliances, this platform ensures seamless operations and effective communication.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            const navLinks = document.querySelector(".nav-links");
+            if (navLinks) {
+                navLinks.classList.toggle("show"); // Use a class like 'show' or 'active'
+            }
+        }
+
+        // Store the full list of appliances globally within this script's scope
+        let fullApplianceListFromUser = []; // Variable to hold the master list
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const storedUser = localStorage.getItem("user");
+
+            if (!storedUser) {
+                alert("Unauthorized access! Please login again.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const user = JSON.parse(storedUser);
+            // Log to verify reportedCount is present
+            console.log("User data on dashboard (expecting reportedCount):", user);
+
+            // Display user details
+            document.getElementById("displayRollNo").textContent = user.rollno || "N/A";
+            document.getElementById("displayName").textContent = user.name || "N/A";
+            document.getElementById("displayResidingStatus").textContent = user.residing_status || "N/A";
+            document.getElementById("displayRoomNo").textContent =localStorage.getItem("kproomno") 
+
+            // Display Roommates
+            if (user.residing_status === "Hosteller" && user.roommates) {
+                displayRoommates(user.roommates);
+            } else if (user.residing_status === "Hosteller") {
+                document.getElementById("roommatesList").innerHTML = '<li>No roommates assigned or data missing.</li>';
+            }
+            else {
+                document.getElementById("roommatesList").innerHTML = '<li>Not applicable (Day Scholar).</li>';
+            }
+
+            // --- Appliances ---
+            const applianceListElement = document.getElementById("applianceList");
+            const queryBtn = document.getElementById("querybtn"); // Get button reference
+
+            // *** Use the enhanced appliance list from the user object ***
+            fullApplianceListFromUser = user.appliances || [];
+            console.log("Full appliance list from user object (with reportedCount):", fullApplianceListFromUser);
+
+            if (Array.isArray(fullApplianceListFromUser) && fullApplianceListFromUser.length > 0) {
+                applianceListElement.innerHTML = ""; // Clear existing
+                let canSubmitAnyQuery = false; // Flag to enable/disable submit button
+
+                fullApplianceListFromUser.forEach((appliance, index) => {
+                    // --- Validation for essential data from backend ---
+                    if (typeof appliance.appliance_id === 'undefined' || appliance.appliance_id === null || typeof appliance.name === 'undefined' || typeof appliance.count === 'undefined') {
+                        console.error("Error loading dashboard: User appliance data missing essential fields (id, name, count):", appliance);
+                        const errorItem = document.createElement("li");
+                        errorItem.textContent = `Error: Invalid data for appliance entry. Cannot process queries.`;
+                        errorItem.style.color = 'red';
+                        applianceListElement.appendChild(errorItem);
+                        return; // Skip this appliance entry
+                    }
+
+                    const li = document.createElement("li");
+                    const nameSpan = document.createElement("span");
+
+                    // --- Read total and reported counts ---
+                    const totalCount = appliance.count || 0; // This is the total count
+                    // Read reportedCount (defaulting to 0 if missing for any reason)
+                    const reportedCount = appliance.reportedCount || 0; // This is the number already reported
+                    // --- Calculate how many MORE can be selected ---
+                    let maxSelectable = Math.max(0, totalCount - reportedCount); // Limit selection
+
+                    // --- Update label to show total and reported ---
+                    nameSpan.textContent = `${appliance.name} (Total: ${totalCount}, Reported: ${reportedCount}) `;
+                    nameSpan.style.marginRight = '10px'; // Add some spacing
+
+                    const minusBtn = document.createElement("button");
+                    minusBtn.textContent = "-";
+
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.value = "0"; // Start selection count at 0
+                    input.readOnly = true;
+                    input.style.width = "30px";
+                    input.style.textAlign = "center";
+                    // *** Set data-max-count to the CALCULATED maxSelectable value ***
+                    input.dataset.maxCount = maxSelectable;
+                    input.id = `appliance-count-${index}`;
+
+                    const plusBtn = document.createElement("button");
+                    plusBtn.textContent = "+";
+
+                    // --- Button click handlers ---
+                    minusBtn.onclick = () => {
+                        let value = parseInt(input.value);
+                        if (value > 0) input.value = value - 1;
+                    };
+
+                    plusBtn.onclick = () => {
+                        let value = parseInt(input.value);
+                        // Read maxSelectable from the data attribute
+                        let maxValue = parseInt(input.dataset.maxCount);
+                        if (value < maxValue) { // Use maxSelectable limit
+                            input.value = value + 1;
+                        }
+                    };
+
+                    // --- Disable '+' button initially if maxSelectable is 0 ---
+                    if (maxSelectable <= 0) {
+                        plusBtn.disabled = true;
+                        // Also disable '-' if starting at 0 and max is 0
+                        minusBtn.disabled = true;
+                        // Visually indicate maybe?
+                        input.style.backgroundColor = '#eee'; // Grey out input slightly
+                    } else {
+                        // If there's at least one appliance where something *can* be selected, enable the main button
+                        canSubmitAnyQuery = true;
+                    }
+
+                    // Append everything
+                    li.appendChild(nameSpan);
+                    li.appendChild(minusBtn);
+                    li.appendChild(input);
+                    li.appendChild(plusBtn);
+                    applianceListElement.appendChild(li);
+                }); // End forEach appliance
+
+                // Disable the main "Raise Query" button if no appliances can be selected at all across the list
+                if (queryBtn) {
+                    if(!canSubmitAnyQuery) {
+                        queryBtn.disabled = true;
+                        // Optionally add a message explaining why
+                        const li = document.createElement("li");
+                        li.textContent = "All appliances are either fully reported or have pending reports for all available units.";
+                        li.style.fontStyle = "italic";
+                        li.style.marginTop = "10px";
+                        applianceListElement.appendChild(li);
+                    } else {
+                        queryBtn.disabled = false; // Ensure enabled otherwise
+                    }
+                }
+
+            } else {
+                applianceListElement.innerHTML = "<li>No appliances assigned to this room.</li>";
+                if(queryBtn) queryBtn.disabled = true; // Disable button if no appliances
+            }
+        }); // End DOMContentLoaded
+
+        function displayRoommates(roommates) {
+        const roommatesList = document.getElementById('roommatesList');
+        roommatesList.innerHTML = '';
+        if (!Array.isArray(roommates)) {
+            console.error("displayRoommates called with non-array:", roommates); // Added error log
+            return;
+        }
+        if (roommates.length === 0) {
+            roommatesList.innerHTML = '<li>No roommates assigned.</li>';
+            return;
+        }
+
+        console.log("Displaying roommates:", roommates); // Log the array to confirm structure
+
+        roommates.forEach(rm => {
+            console.log("Processing roommate object:", rm); // Log each object to see properties
+            const li = document.createElement('li');
+
+            li.textContent = `${rm.NAME || 'N/A'} (${rm.ROLLNO || 'N/A'}) - ${rm.RESIDING_STATUS || 'N/A'}`;
+
+            roommatesList.appendChild(li);
+        });
+    }
+
+        // This function remains the same as before
+        function submitFaultyAppliances() {
+            const selectedFaultyAppliances = [];
+            // Iterate through the MASTER list stored in the variable
+            fullApplianceListFromUser.forEach((appliance, index) => {
+                const inputElement = document.getElementById(`appliance-count-${index}`);
+                // Check if inputElement exists
+                if (inputElement) {
+                    const count = parseInt(inputElement.value);
+                    if (count > 0) {
+                        // Add only items with selected count > 0
+                        selectedFaultyAppliances.push({
+                            name: appliance.name,
+                            count: count, // The selected faulty count
+                            appliance_id: appliance.appliance_id // Ensure the ID is passed
+                        });
+                    }
+                } else {
+                    console.warn(`Input element not found for appliance index ${index}, name: ${appliance.name}`);
+                }
+            });
+
+            if (selectedFaultyAppliances.length === 0) {
+                // Check if the button should have been disabled in the first place
+                if(document.getElementById("querybtn") && !document.getElementById("querybtn").disabled) {
+                    alert("Please select the count (> 0) for at least one faulty appliance.");
+                } else {
+                    // Button was likely disabled, maybe do nothing or log
+                    console.log("Submit called but no items selected and button might be disabled.");
+                }
+                return;
+            }
+
+            console.log("Saving selected faulty appliances to localStorage:", selectedFaultyAppliances);
+            localStorage.setItem("appliances", JSON.stringify(selectedFaultyAppliances));
+            window.location.href = "raiseQuery.html";
+        }
+
+    </script>
+</body>
+</html>
