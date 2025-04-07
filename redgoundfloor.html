@@ -12,7 +12,7 @@
         <div class="logo">RED BUILDING GROUND FLOOR</div>
         <nav>
             <ul class="nav-links">
-                <li><a href="Homepage.html">Home</a></li>
+                <li><a href="Homepage.html" class="hreff">Home</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=asknfix147@gmail.com" target="_blank">Contact</a></li>
                 <li><a href="login.html">Logout</a></li>
@@ -22,24 +22,22 @@
     </header>
 
     <section class="buttons">
-        <button class="large-btn room">EG HALL-13</button>
-        <button class="large-btn room">EG HALL-10</button>
-        <button class="large-btn room">70</button>
-        <button class="large-btn room">71</button>
-        <button class="large-btn room">72</button>
-        <button class="large-btn room">73</button>
-        <button class="large-btn room">74</button>
-        <button class="large-btn room">75</button>
-        <button class="large-btn room">76</button>
-        <button class="large-btn room">77</button>
-        <button class="large-btn room">78</button>
-        <button class="large-btn room">79</button>
-        <button class="large-btn room">80</button>
-        <button class="large-btn room">81</button>
-        <button class="large-btn room">82</button>
-        <button class="large-btn room">83</button>
-        <button class="large-btn room">84</button>
-        <button class="large-btn room">85</button>
+        <a href="redquery.html" onclick="f1(EGHALL-13)"><button class="large-btn room">EG HALL-13</button></a>
+        <a href="redquery.html" onclick="f1(EGHALL-10)"><button class="large-btn room">EG HALL-10</button></a>
+        <a href="redquery.html" onclick="f1(69)"><button class="large-btn room">69</button></a>
+        <a href="redquery.html" onclick="f1(70)"><button class="large-btn room">70</button></a>
+        <a href="redquery.html" onclick="f1(71)"><button class="large-btn room">71</button></a>
+        <a href="redquery.html" onclick="f1(72)"><button class="large-btn room">72</button></a>
+        <a href="redquery.html" onclick="f1(73)"><button class="large-btn room">73</button></a>
+        <a href="redquery.html" onclick="f1(74)"><button class="large-btn room">74</button></a>
+        <a href="redquery.html" onclick="f1(75)"><button class="large-btn room">75</button></a>
+        <a href="redquery.html" onclick="f1(76)"><button class="large-btn room">76</button></a>
+        <a href="redquery.html" onclick="f1(77)"><button class="large-btn room">77</button></a>
+        <a href="redquery.html" onclick="f1(78)"><button class="large-btn room">78</button></a>
+        <a href="redquery.html" onclick="f1(79)"><button class="large-btn room">79</button></a>
+        <a href="redquery.html" onclick="f1(80)"><button class="large-btn room">80</button></a>
+        <a href="redquery.html" onclick="f1(81)"><button class="large-btn room">81</button></a>
+        
     </section>
 
     <footer>
@@ -50,6 +48,17 @@
     <script>
         function toggleMenu() {
             document.querySelector(".nav-links").classList.toggle("show");
+        }
+        const user1 = JSON.parse(localStorage.getItem("user")); 
+        //alert(user1 ? user1.residing_status : "User data not found");
+         document.querySelector(".hreff").addEventListener("click", function() {
+            if(user1.residing_status==="Hosteller")
+            window.location.href = "Homepage.html";
+         else
+        window.location.href = "Homepage1.html";
+        });
+        function f1(roomno) {
+            localStorage.setItem("redroomno", roomno);
         }
     </script>
 
