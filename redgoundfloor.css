@@ -9,7 +9,10 @@ body {
     background-position: bottom;
     min-height:100vh;
     
-    
+ a
+ {
+    text-decoration: none;
+ }   
 }
 header {
     display: flex;
@@ -59,7 +62,7 @@ nav {
     margin-top: 40px;
     padding: 40px 0;
     display: grid;
-    grid-template-columns: repeat(6,1fr);
+    grid-template-columns: repeat(5,1fr);
     justify-content: center;
     gap:10px;
     max-width: 1000px;
