@@ -6,9 +6,7 @@ body {
     color: white;
     background-image: url("./images/background.jpg");
     background-size: cover;
-    background-repeat: no-repeat;
     background-position: bottom;
-    min-height: 100vh;
 }
 a{
     text-decoration: none;
@@ -60,9 +58,9 @@ nav {
     text-align: center;
     margin-top: 40px;
     padding: 40px 0;
-    padding-top: 90px;
+    padding-top: 100px;
     display: grid;
-    grid-template-columns: repeat(5,1fr);
+    grid-template-columns: repeat(2,1fr);
     justify-content: center;
     gap:10px;
     max-width: 1000px;
@@ -91,19 +89,18 @@ nav {
   filter: brightness(0.9); /* Increase brightness */
 }
 .gp {
-    background: linear-gradient(to bottom,black, #ffffff);
+    background-image: url('./images/groundfloor.jpg ');
 }
 
 .fs {
-    background: linear-gradient(to bottom, #a18cd1, #fbc2eb);
+    background-image: url('./images/first floor.jpg');
 }
 .sf {
-    background: linear-gradient(to bottom, #a18cd1, #fbc2eb);
-
+    background-image: url('./images/second floor.jpg');
 }
 .tf
 {
-    background: linear-gradient(to bottom,black, #ffffff);
+    background-image: url('./images/third floor.jpg');
 }
 .hamburger:hover
 {
