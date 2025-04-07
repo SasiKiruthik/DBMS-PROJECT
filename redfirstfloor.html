@@ -12,7 +12,7 @@
         <div class="logo">RED BUILDING GROUND FLOOR</div>
         <nav>
             <ul class="nav-links">
-                <li><a href="Homepage.html">Home</a></li>
+                <li><a href="Homepage.html" class="hreff">Home</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=asknfix147@gmail.com" target="_blank">Contact</a></li>
                 <li><a href="login.html">Logout</a></li>
@@ -22,14 +22,14 @@
     </header>
 
     <section class="buttons">
-        <button class="large-btn room">EG HALL-49</button>
-        <button class="large-btn room">EG HALL-30</button>
-        <button class="large-btn room">M1</button>
-        <button class="large-btn room">M2</button>
-        <button class="large-btn room">M3</button>
-        <button class="large-btn room">M4</button>
-        <button class="large-btn room">M5</button>
-        <button class="large-btn room">M6</button>
+        <a href="redquery.html" onclick="f1(EGHALL-49)"><button class="large-btn room">EG HALL-49</button></a>
+        <a href="redquery.html" onclick="f1(EGHALL-30)"><button class="large-btn room">EG HALL-30</button></a>
+        <a href="redquery.html" onclick="f1(M1)"><button class="large-btn room">M1</button></a>
+        <a href="redquery.html" onclick="f1(M2)"><button class="large-btn room">M2</button></a>
+        <a href="redquery.html" onclick="f1(M3)"><button class="large-btn room">M3</button></a>
+        <a href="redquery.html" onclick="f1(M4)"><button class="large-btn room">M4</button></a>
+        <a href="redquery.html" onclick="f1(M5)"><button class="large-btn room">M5</button></a>
+        <a href="redquery.html" onclick="f1(M6)"><button class="large-btn room">M6</button></a>
     </section>
 
     <footer>
@@ -40,6 +40,17 @@
     <script>
         function toggleMenu() {
             document.querySelector(".nav-links").classList.toggle("show");
+        }
+        const user1 = JSON.parse(localStorage.getItem("user")); 
+        //alert(user1 ? user1.residing_status : "User data not found");
+         document.querySelector(".hreff").addEventListener("click", function() {
+            if(user1.residing_status==="Hosteller")
+            window.location.href = "Homepage.html";
+         else
+        window.location.href = "Homepage1.html";
+        });
+        function f1(roomno) {
+            localStorage.setItem("redroomno", roomno);
         }
     </script>
 
