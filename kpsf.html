@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AskNFix</title>
+    <link rel="icon" href="images/Logo.jpg">
+    <link rel="stylesheet" href="kpff.css">
+</head>
+<body>
+    <header>
+        <div class="logo">KP BUILDING-SECOND FLOOR</div>
+        <nav>
+            <ul class="nav-links">
+                <li><a class="hreff">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=asknfix147@gmail.com">Contact</a></li>
+                <li><a href="login.html">Logout</a></li>
+            </ul>
+            <div class="hamburger" onclick="toggleMenu()">☰</div>
+        </nav>
+    </header>
+
+    <section class="buttons">
+        <a href="kpquery.html" onclick="f1(201)"><button class="large-btn sf">201</button></a>
+        <a href="kpquery.html" onclick="f1(202)"><button class="large-btn fs">202</button></a>
+        <a href="kpquery.html" onclick="f1(203)"><button class="large-btn sf">203</button></a>
+        <a href="kpquery.html" onclick="f1(204)"><button class="large-btn fs">204</button></a>
+        <a href="kpquery.html" onclick="f1(205)"><button class="large-btn sf">205</button></a>
+        <a href="kpquery.html" onclick="f1(206)"><button class="large-btn fs">206</button></a>
+        <a href="kpquery.html" onclick="f1(207)"><button class="large-btn sf">207</button></a>
+        <a href="kpquery.html" onclick="f1(208)"><button class="large-btn fs">208</button></a>
+        <a href="kpquery.html" onclick="f1(209)"><button class="large-btn sf">209</button></a>
+        <a href="kpquery.html" onclick="f1(210)"><button class="large-btn fs">210</button></a>
+    </section>
+
+    <footer>
+        <p >Contact us: support@asknfix.com | Phone: +7397247862<br><hr>
+            AskNFix is an innovative web application designed to streamline record-keeping and issue resolution for students and administrators. Whether it’s managing hostel accommodations, college records, or tracking KP appliances, this platform ensures seamless operations and effective communication</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("show");
+        }
+        const user1 = JSON.parse(localStorage.getItem("user")); 
+        //alert(user1 ? user1.residing_status : "User data not found");
+         document.querySelector(".hreff").addEventListener("click", function() {
+            if(user1.residing_status==="Hosteller")
+            window.location.href = "Homepage.html";
+         else
+        window.location.href = "Homepage1.html";
+        });
+        function f1(roomno) {
+            localStorage.setItem("kproomno", roomno);
+        }
+    </script>
+
+</body>
+</html>
