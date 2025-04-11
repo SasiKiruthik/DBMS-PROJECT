@@ -3,36 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AskNFix</title>
+    <title>AskNFix - Staff Login</title>
     <link rel="icon" href="images/Logo.jpg">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="stafflogin.css"> <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+       
+        /* Assuming styles.css or browser defaults provide some base button styling */
+        /* Explicitly style the submit button if needed for consistency */
+        .login-box button[type="submit"] {
+            height: 50px;
+            width: 100%; /* Make login button full width */
+            padding: 10px 15px;
+            margin-top: 10px; /* Space above the button */
+            margin-bottom: 10px;
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        /* Style for the new back button */
+        .back-button {
+            height: 50px;
+            background-color: mediumseagreen; /* The requested medium green */
+            color: white; /* White text like typical buttons */
+            border: none;
+            padding: 10px 15px; /* Match submit button padding */
+            width: 100%; /* Make it full width */
+            border-radius: 4px; /* Example: match submit button radius */
+            font-size: 1em; /* Example: match submit button font size */
+            cursor: pointer;
+            display: block; /* Ensure it takes full width */
+            margin-top: 10px; /* Space between login and back button */
+            box-sizing: border-box; /* Include padding in width */
+            font-family: 'Poppins', sans-serif; /* Ensure font matches */
+            font-weight: 400; /* Adjust as needed */
+        }
+
+        .back-button:hover {
+            background-color: #3CB371; /* Slightly darker green on hover */
+            opacity: 0.9; /* Or other hover effect */
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 10px;
+            min-height: 1.2em;
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+    </style>
 </head>
 <body>
-    
+
     <div class="container">
         <div class="login-box" >
             <div id="n1">
                 <div class="logo"><span style="font-weight: 600;">AskNFix</span></div>
-                <!--<img src="logo.jpg"  alt="AskNFix Logo" id="logo-img">-->
             </div>
-            
+
             <h2>Staff Login</h2>
-            
-                <form id="loginForm">
+
+            <form id="loginForm">
                 <div class="input-group">
-                    <input type="number" id="rollno" placeholder="UserId" required>
+                    <input type="text" id="staffId" placeholder="Staff ID" required>
                 </div>
                 <div class="input-group">
                     <input type="password" id="password" placeholder="Password" required>
                 </div>
-                
-                <button type="submit">Login</button>
+                <p id="errorMessage" class="error-message"></p> <button type="submit">Login</button>
             </form>
+
+            <button type="button" class="back-button" onclick="window.location.href='login.html'">
+                Back to Student Login
+            </button>
+
         </div>
     </div>
 
-    <script src="login.js"></script>
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const staffIdInput = document.getElementById('staffId');
+        const passwordInput = document.getElementById('password');
+        const errorMessageElement = document.getElementById('errorMessage');
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+            errorMessageElement.style.display = 'none'; // Hide previous errors
+            errorMessageElement.textContent = '';
+
+            const staffId = staffIdInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!staffId || !password) {
+                errorMessageElement.textContent = 'Please enter both Staff ID and Password.';
+                errorMessageElement.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/staff-login', { // Send request to the staff login endpoint
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ staffId, password }), // Send correct keys
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.redirectTo) {
+                    // Login successful, redirect to the dashboard
+                    console.log('Staff login successful, redirecting...');
+                    window.location.href = result.redirectTo; // Redirect based on server response
+                } else {
+                    // Login failed, display error message
+                    errorMessageElement.textContent = result.message || 'Login failed. Please try again.';
+                    errorMessageElement.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login request failed:', error);
+                errorMessageElement.textContent = 'An error occurred during login. Please check your connection or try again later.';
+                errorMessageElement.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>
