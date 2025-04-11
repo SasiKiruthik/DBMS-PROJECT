@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard - AskNFix</title>
+    <link rel="icon" href="images/Logo.jpg">
+    <link rel="stylesheet" href="staff_dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    </head>
+<body>
+
+    <header>
+        <div class="logo">AskNFix</div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="about.html">About</a></li> <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=asknfix147@gmail.com" target="_blank">Contact</a></li>
+                <li><a href="#" onclick="handleLogout()">Logout</a></li>
+            </ul>
+            <div class="hamburger" onclick="toggleMenu()">☰</div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="dashboard-container">
+            <button id="logoutButton" class="logout-button">Logout</button>
+            <h1>Staff Dashboard</h1>
+            <hr>
+
+            <div class="user-info">
+                <h2>Welcome, <span id="staff-name">Loading...</span>!</h2>
+                <p><strong>Staff ID:</strong> <span id="staff-id">Loading...</span></p>
+                <p><strong>Role:</strong> <span id="staff-role">Loading...</span></p>
+            </div>
+
+            <div class="clear"></div> <div class="action-button-container">
+                <button type="button" id="viewQueriesButton" class="action-button" onclick="window.location.href='view_queries.html'">
+                    View Queries
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Contact us: support@asknfix.com | Phone: +123 456 7890</p>
+        <p>AskNFix &copy; 2024</p> </footer>
+
+    <script>
+        // Element references
+        const staffNameElement = document.getElementById('staff-name');
+        const staffIdElement = document.getElementById('staff-id');
+        const staffRoleElement = document.getElementById('staff-role');
+        const logoutButton = document.getElementById('logoutButton'); // Reference for the button inside container
+
+        // Function to toggle responsive navigation menu
+        function toggleMenu() {
+            const navLinks = document.querySelector(".nav-links");
+            if (navLinks) {
+                navLinks.classList.toggle("show"); // Toggles the .show class for CSS rules
+            }
+        }
+
+        // Function to fetch logged-in staff user data
+        async function fetchUserData() {
+            try {
+                const response = await fetch('/user');
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                const result = await response.json();
+
+                if (result.success && result.user && result.user.type === 'staff') {
+                    staffNameElement.textContent = result.user.name || 'N/A';
+                    staffIdElement.textContent = result.user.id || 'N/A';
+                    staffRoleElement.textContent = result.user.role || 'N/A';
+                } else {
+                    console.warn('User not logged in as staff or error fetching data.', result.message);
+                    window.location.href = '/stafflogin.html'; // Redirect non-staff/logged-out users
+                }
+            } catch (error) {
+                console.error('Failed to fetch user data:', error);
+                 staffNameElement.textContent = 'Error';
+                 staffIdElement.textContent = 'Error';
+                 staffRoleElement.textContent = 'Error';
+                 // Consider redirecting on error
+                 // setTimeout(() => { window.location.href = '/stafflogin.html'; }, 2000);
+            }
+        }
+
+        // Function to handle user logout (called by header link and potentially button)
+        async function handleLogout() {
+             console.log("handleLogout called");
+            try {
+                const response = await fetch('/logout', { method: 'POST' });
+                 if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log('Logout successful, redirecting to login...');
+                     // alert('Logout successful!'); // Optional feedback
+                    window.location.href = '/stafflogin.html'; // Redirect to staff login page
+                } else {
+                    console.error('Logout failed:', result.message);
+                    alert(`Logout failed: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Logout request failed:', error);
+                alert('An error occurred during logout.');
+            }
+        }
+
+        // Add event listener for the logout button within the main content (if kept)
+        if(logoutButton) {
+             logoutButton.addEventListener('click', handleLogout);
+         }
+
+        // Fetch user data when the page loads
+        document.addEventListener('DOMContentLoaded', fetchUserData);
+
+    </script>
+</body>
+</html>

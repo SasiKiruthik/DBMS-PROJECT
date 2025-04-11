@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Queries - AskNFix</title>
+    <link rel="icon" href="images/Logo.jpg">
+    <link rel="stylesheet" href="view_queries.css"> <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="logo">AskNFix</div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="staff_dashboard.html">Dashboard</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=asknfix147@gmail.com" target="_blank">Contact</a></li>
+                <li><a href="#" onclick="handleLogout()">Logout</a></li>
+            </ul>
+            <div class="hamburger" onclick="toggleMenu()">☰</div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+           
+
+            <h1>Pending Queries</h1>
+            <hr>
+
+            <div id="queries-container">
+                <p class="loading-message">Loading queries...</p>
+                </div>
+
+            <div class="clear"></div> </div>
+    </main>
+
+    <footer>
+        <p>Contact us: support@asknfix.com | Phone: +123 456 7890</p>
+        <p>AskNFix &copy; 2025</p> </footer>
+
+    <script>
+        // Function to toggle responsive navigation menu
+        function toggleMenu() {
+            const navLinks = document.querySelector(".nav-links");
+            if (navLinks) {
+                navLinks.classList.toggle("show");
+            }
+        }
+
+        // Function to handle user logout (Needed for header link)
+        async function handleLogout() {
+            console.log("handleLogout called from view_queries");
+            try {
+                const response = await fetch('/logout', { method: 'POST' });
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = '/stafflogin.html';
+                } else {
+                    alert(`Logout failed: ${result.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Logout request failed:', error);
+                alert('An error occurred during logout.');
+            }
+        }
+
+        // --- Query Fetching and Display Logic ---
+
+        const queriesContainer = document.getElementById('queries-container');
+
+        // Function to fetch queries from the backend API
+        async function fetchQueries() {
+            if (!queriesContainer) return; // Safety check
+            queriesContainer.innerHTML = '<p class="loading-message">Loading queries...</p>'; // Show loading message
+
+            try {
+                const response = await fetch('/api/queries'); // Call the backend endpoint
+
+                if (!response.ok) {
+                    // Handle HTTP errors (like 401 Unauthorized, 500 Internal Server Error)
+                    let errorMsg = `HTTP error! status: ${response.status}`;
+                    try {
+                        const errData = await response.json();
+                        errorMsg = errData.message || errorMsg;
+                    } catch (e) { /* Ignore if response body isn't JSON */ }
+                    throw new Error(errorMsg);
+                }
+
+                const result = await response.json();
+
+                if (!result.success) {
+                     // Handle errors reported by the API itself (e.g., { success: false, message: '...' })
+                     throw new Error(result.message || 'Failed to fetch queries from API.');
+                 }
+
+                // Check if queries array exists and has items
+                if (!Array.isArray(result.queries) || result.queries.length === 0) {
+                    queriesContainer.innerHTML = '<p class="loading-message">No pending queries found.</p>';
+                    return;
+                }
+
+                // Clear loading message and render queries
+                queriesContainer.innerHTML = '';
+                result.queries.forEach(query => {
+                    const queryElement = createQueryElement(query);
+                    queriesContainer.appendChild(queryElement);
+                });
+
+            } catch (error) {
+                console.error('Failed to fetch queries:', error);
+                queriesContainer.innerHTML = `<p class="loading-message" style="color: red;">Error loading queries: ${error.message}. Please try again later.</p>`;
+            }
+        }
+
+        // Function to create HTML element for a single query
+        function createQueryElement(query) {
+            const div = document.createElement('div');
+            div.className = 'query-item';
+            div.setAttribute('data-query-id', query.queryId); // Add ID to the item itself
+
+            // Format appliances array into a readable string
+            const appliancesStr = (Array.isArray(query.appliances) && query.appliances.length > 0)
+                ? query.appliances.map(app => `${app.name || 'N/A'} (${app.count || 'N/A'})`).join(', ')
+                : 'None specified'; // Handle empty or missing appliances array
+
+            // Format date - add null/undefined check
+            const formattedDate = query.dateReported
+                ? new Date(query.dateReported).toLocaleDateString()
+                : 'N/A';
+
+            div.innerHTML = `
+                <h3>Query ID: ${query.queryId || 'N/A'}</h3>
+                <p><strong>Room:</strong> ${query.roomNo || 'N/A'}</p>
+                <p><strong>Reported by:</strong> ${query.reportedBy || 'N/A'}</p>
+                <p><strong>Description:</strong> ${query.description || 'No description'}</p>
+                <p><strong>Appliances:</strong> ${appliancesStr}</p>
+                <p><strong>Status:</strong> ${query.status || 'N/A'}</p>
+                <button class="mark-done-button" data-query-id="${query.queryId}">Mark as Done</button>
+            `;
+
+            // Add event listener to the "Mark as Done" button for this specific query item
+             const markDoneButton = div.querySelector('.mark-done-button');
+             if (markDoneButton) {
+                 markDoneButton.addEventListener('click', (event) => {
+                     // Prevent potential parent event listeners if needed
+                     event.stopPropagation();
+                     const button = event.target;
+                     button.disabled = true; // Disable button immediately
+                     button.textContent = 'Processing...';
+                     handleMarkAsDone(query.queryId, button); // Pass button for UI feedback
+                 });
+             } else {
+                console.error(`Could not find mark-done-button for query ${query.queryId}`);
+             }
+
+            return div;
+        }
+
+        // Function to handle marking a query as done via API call
+        async function handleMarkAsDone(queryId, buttonElement) {
+             console.log(`Attempting to mark query ${queryId} as done.`);
+
+             try {
+                // Make POST request to the backend API endpoint
+                 const response = await fetch(`/api/queries/${queryId}/complete`, {
+                     method: 'POST',
+                     headers: {
+                         // Include headers if required by your backend (e.g., CSRF token)
+                         'Content-Type': 'application/json' // Even if body is empty, good practice
+                     }
+                     // No body needed for this specific action usually
+                 });
+
+                 if (!response.ok) {
+                     // Handle HTTP errors (like 403 Forbidden, 404 Not Found, 500)
+                     let errorMsg = `Failed to update. Status: ${response.status}`;
+                     try {
+                         const errData = await response.json();
+                         errorMsg = errData.message || errorMsg;
+                     } catch (e) { /* Ignore if response body isn't JSON */ }
+                     throw new Error(errorMsg);
+                 }
+
+                 const result = await response.json();
+
+                 if (result.success) {
+                     console.log(`Query ${queryId} successfully marked as done.`);
+                     // alert('Query marked as done!'); // Optional feedback
+
+                     // Option 1: Remove the specific element from the DOM
+                     const queryItemElement = document.querySelector(`.query-item[data-query-id="${queryId}"]`);
+                     if (queryItemElement) {
+                         queryItemElement.style.opacity = '0.5'; // Visual feedback
+                         queryItemElement.style.transition = 'opacity 0.5s ease-out';
+                         setTimeout(() => {
+                            queryItemElement.remove();
+                             // Check if container is empty after removal
+                             if (queriesContainer && queriesContainer.children.length === 0) {
+                                 queriesContainer.innerHTML = '<p class="loading-message">No pending queries found.</p>';
+                             }
+                          }, 500); // Remove after fade out
+                     } else {
+                         // Fallback if element not found: Refresh the whole list
+                         fetchQueries();
+                     }
+
+                     // Option 2: Refresh the entire list (simpler but less smooth)
+                     // fetchQueries();
+
+                 } else {
+                     // Handle API reporting failure (e.g., { success: false, message: '...' })
+                     throw new Error(result.message || 'API reported failure.');
+                 }
+
+             } catch (error) {
+                 console.error(`Error marking query ${queryId} as done:`, error);
+                 alert(`Failed to mark query as done: ${error.message}`);
+                 // Re-enable the button if the operation failed
+                 if (buttonElement) {
+                    buttonElement.disabled = false;
+                    buttonElement.textContent = 'Mark as Done';
+                 }
+             }
+         }
+
+        // --- Initialization ---
+        // Fetch queries when the page is fully loaded
+        document.addEventListener('DOMContentLoaded', fetchQueries);
+
+    </script>
+</body>
+</html>

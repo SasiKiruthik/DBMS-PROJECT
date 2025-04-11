@@ -1,0 +1,208 @@
+/* view_queries.css - With Fixes */
+
+/* --- Base Styles (Body, Header, Footer) --- */
+body {
+    background: url('./images/loginbackground.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    /* --- FIX: Adjusted Padding for calculated header/footer height --- */
+    padding-top: 60px;  /* Should MATCH staff_dashboard.css */
+    padding-bottom: 50px; /* Should MATCH staff_dashboard.css */
+    box-sizing: border-box;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%; /* --- FIX: Full width --- */
+    z-index: 100;
+    padding: 15px 20px; /* --- FIX: Consistent padding --- */
+    box-sizing: border-box; /* --- FIX: Add box-sizing --- */
+    /* Removed fixed height: height: 40px; */
+}
+
+.logo {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: white;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+}
+.nav-links {
+    list-style: none; padding: 0; margin: 0; display: flex;
+}
+.nav-links li { margin: 0 15px; }
+.nav-links a { text-decoration: none; color: white; font-weight: bold; transition: color 0.3s ease; }
+.nav-links a:hover { color: #ddd; }
+.hamburger { display: none; font-size: 24px; cursor: pointer; color: white; }
+
+
+footer {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%; /* --- FIX: Full width --- */
+    z-index: 100;
+    padding: 10px 20px; /* --- FIX: Consistent padding --- */
+    box-sizing: border-box; /* --- FIX: Add box-sizing --- */
+    /* Removed fixed height: height: 30px; */
+    font-size: 0.9em;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+footer p { margin: 5px 0; }
+
+/* --- Main Content Area for Queries --- */
+.container {
+    max-width: 900px;
+    margin: 30px auto; /* Centered within padded body */
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+.container hr {
+    margin-top: 10px; margin-bottom: 25px; border: 0; border-top: 1px solid #ddd;
+}
+
+
+/* --- Query List Styling --- */
+#queries-container {
+    margin-top: 20px;
+}
+
+.loading-message {
+    text-align: center;
+    font-style: italic;
+    color: #555;
+    padding: 20px;
+}
+
+.query-item {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.query-item h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #444;
+    font-size: 1.1em;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 5px;
+}
+
+.query-item p {
+    margin: 8px 0;
+    font-size: 0.95em;
+    color: #555;
+}
+
+.query-item p strong {
+    font-weight: 600;
+    color: #333;
+    margin-right: 5px;
+    display: inline-block;
+    min-width: 100px;
+}
+
+/* --- Button Styles --- */
+/* Back button was removed from HTML, styles removed */
+.clear { clear: both; } /* Still useful if other floats added */
+
+.mark-done-button {
+    background-color: #28a745;
+    color: #fff;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: block;
+    margin-top: 10px;
+}
+.mark-done-button:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+.mark-done-button:active {
+    background-color: #1e7e34;
+    transform: scale(0.98);
+}
+
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+     /* Adjust body padding based on responsive header/footer height */
+     body {
+        padding-top: 60px; /* Example */
+        padding-bottom: 40px; /* Example */
+    }
+
+    header {
+        padding: 10px 15px; /* Adjust mobile padding */
+    }
+    .logo { font-size: 1.5em; }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        background: rgba(0, 0, 0, 0.9);
+        position: absolute;
+        top: 55px; /* Adjust based on actual header height */
+        right: 15px;
+        width: 180px;
+        padding: 10px 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+        text-align: center;
+    }
+    .nav-links.show { display: flex; }
+    .nav-links li { margin: 12px 0; }
+    .hamburger { display: block; }
+
+     footer {
+        padding: 8px 15px; /* Adjust mobile padding */
+        font-size: 0.8em;
+    }
+
+     .container {
+        margin: 20px auto; /* Adjust vertical margin */
+        padding: 20px;
+         /* Use calc for width respecting padding */
+        width: calc(100% - 30px); /* 15px padding on each side */
+        box-sizing: border-box;
+    }
+     /* Removed .back-button styles */
+}
