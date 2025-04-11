@@ -1,14 +1,16 @@
+/* kpff.css - MODIFIED with increased bottom gap */
 
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
+    padding: 0; /* Add padding-top if header becomes fixed */
     color: white;
-    background-image: url("./images/background.jpg");
+    background-image: url("./images/background.png");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: bottom;
     min-height: 100vh;
+    background-attachment: fixed;
 }
 a{
     text-decoration: none;
@@ -20,6 +22,8 @@ header {
     background:rgba(255, 255, 255, 0.1);
     padding: 15px 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* If header should be fixed, add: */
+    /* position: fixed; top: 0; left: 0; width: 100%; z-index: 100; box-sizing: border-box; */
 }
 
 .logo {
@@ -49,95 +53,145 @@ nav {
     color: white;
     font-weight: bold;
 }
+nav a:hover {
+     color: #ddd;
+}
 
 .hamburger {
     display: none;
     font-size: 24px;
     cursor: pointer;
+    color: white;
 }
 
-.buttons {  
-    text-align: center;
-    margin-top: 40px;
-    padding: 40px 0;
-    padding-top: 90px;
+/* --- UPDATED Buttons Section --- */
+section.buttons {
     display: grid;
-    grid-template-columns: repeat(5,1fr);
-    justify-content: center;
-    gap:10px;
+    grid-template-columns: repeat(5, 1fr); /* Exactly 5 columns */
+    /* --- FIX: Increased bottom gap using row-gap --- */
+    column-gap: 20px;    /* Horizontal gap between buttons */
+    row-gap: 50px;       /* Vertical gap between rows (Increased from 20px) */
+    /* gap: 20px; */    /* Replaced by specific properties above */
     max-width: 1000px;
-    size:1000px;
-    margin: auto;
+    margin: 40px auto;
+    padding: 20px;
+    padding-top: 90px;
+    box-sizing: border-box;
+    justify-items: center;
 }
 
-.large-btn {
+/* Link containing button */
+section.buttons a {
     display: block;
-    width: 90%;
-    max-width: 400px;
+    text-decoration: none;
+}
+
+/* --- Button Styling (fixed size 120x120) --- */
+.large-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
     height: 150px;
-    margin: 15px auto;
-    font-size: 24px;
+    padding: 5px;
+    margin: 0;
+    font-size: 18px;
     font-weight: bold;
     color: white;
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
-    background-size:cover;
-    background-position: center;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    text-align: center;
+    line-height: 1.2;
+    overflow: hidden;
 }
+
 .large-btn:hover{
-    transform: scale(1.1); /* Increase size by 20% */
-  filter: brightness(0.9); /* Increase brightness */
+    transform: scale(1.05);
+    filter: brightness(1.1);
 }
+
+/* Background Styles */
 .gp {
-    background: linear-gradient(to bottom,black, #ffffff);
+    background: linear-gradient(to bottom, black, #ffffff);
 }
-
-.fs {
+.fs, .sf {
     background: linear-gradient(to bottom, #a18cd1, #fbc2eb);
 }
-.sf {
-    background: linear-gradient(to bottom, #a18cd1, #fbc2eb);
+.tf {
+    background: linear-gradient(to bottom, black, #ffffff);
+}
 
+.hamburger:hover {
+    opacity: 0.8;
 }
-.tf
-{
-    background: linear-gradient(to bottom,black, #ffffff);
-}
-.hamburger:hover
-{
-    font-size:30px;
-}
-nav:hover{
-    color: grey;
-}
+
 footer {
     text-align: center;
-    padding: 10px;
-    margin-top:60px;
+    padding: 15px;
+    margin-top: 60px;
     background:rgba(255, 255, 255, 0.1);
     color: white;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+footer hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin: 10px auto;
+    width: 80%;
 }
 
 @media (max-width: 768px) {
+     header {
+        padding: 10px 15px;
+    }
     .nav-links {
         display: none;
         flex-direction: column;
         background:black;
         position: absolute;
-        top: 60px;
-        right: 0;
+        top: 55px; /* Adjust */
+        right: 15px;
         width: 150px;
         padding: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
     }
 
     .nav-links.show {
         display: flex;
     }
+     .nav-links li {
+        margin: 10px 0;
+    }
 
     .hamburger {
         display: block;
+    }
+
+    section.buttons {
+         grid-template-columns: repeat(3, 1fr); /* 3 columns on mobile */
+         /* --- FIX: Adjust gaps for mobile --- */
+         column-gap: 15px; /* Mobile horizontal gap */
+         row-gap: 25px;    /* Mobile vertical gap (Increased) */
+         /* gap: 15px; */ /* Replaced */
+         padding: 15px;
+         padding-top: 70px;
+         max-width: 95%;
+    }
+
+    .large-btn {
+        /* Keep smaller size */
+        width: 100px;
+        height: 100px;
+        font-size: 16px;
+    }
+
+     footer {
+        padding: 10px;
+        font-size: 0.9em;
     }
 }
