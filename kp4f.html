@@ -53,7 +53,7 @@
     </header>
 
     <section class="buttons" id="roomButtonsContainer">
-         <p class="loading-message">Loading rooms...</p>
+            <p class="loading-message">Loading rooms...</p>
     </section>
 
     <footer>
@@ -62,14 +62,9 @@
     </footer>
 
     <script>
-        // --- Keep existing toggleMenu, f1, logout functions ---
+        // --- Keep existing toggleMenu and logout functions ---
         function toggleMenu() {
             document.querySelector(".nav-links").classList.toggle("show");
-        }
-
-        function f1(roomno) {
-            console.log("Storing room number for KP query:", roomno);
-            localStorage.setItem("kproomno", roomno);
         }
 
         function logout(event) {
@@ -97,7 +92,7 @@
             });
         }
 
-        // --- NEW: Function to fetch and display rooms for Fourth Floor ---
+        // --- NEW: Function to fetch and display rooms for Fourth Floor (Modified) ---
         async function fetchAndDisplayRooms() {
             const container = document.getElementById('roomButtonsContainer');
             if (!container) {
@@ -133,7 +128,28 @@
                 result.rooms.forEach((roomno, index) => {
                     const link = document.createElement('a');
                     link.href = 'kpquery.html';
-                    link.addEventListener('click', () => { f1(roomno); });
+
+                    // Add click listener to fetch appliances and navigate
+                    link.addEventListener('click', async (event) => {
+                        event.preventDefault(); // Prevent default navigation
+
+                        try {
+                            const applianceResponse = await fetch(`/getKpAppliances/${roomno}`);
+                            const applianceData = await applianceResponse.json();
+
+                            if (applianceData.success) {
+                                localStorage.setItem('kpAppliances', JSON.stringify(applianceData.appliances));
+                                localStorage.setItem('kproomno', roomno);
+                                window.location.href = 'kpquery.html';
+                            } else {
+                                alert(applianceData.message || 'Failed to fetch appliances for this room.');
+                                console.error('Failed to fetch KP appliances:', applianceData);
+                            }
+                        } catch (error) {
+                            console.error('Error fetching KP appliances:', error);
+                            alert('An error occurred while fetching appliances.');
+                        }
+                    });
 
                     const button = document.createElement('button');
                     button.classList.add('large-btn');
@@ -167,7 +183,7 @@
                     }
                 });
             } else {
-                 console.error("Home link (.hreff) not found");
+                console.error("Home link (.hreff) not found");
             }
 
             // Fetch and display the dynamic room buttons for the fourth floor
