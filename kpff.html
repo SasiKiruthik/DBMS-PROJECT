@@ -22,6 +22,24 @@
             gap: 15px; /* Space between buttons */
             padding: 20px;
         }
+        .large-btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .large-btn:hover {
+            background-color: #eee;
+        }
+        /* Example alternating button styles (you can customize) */
+        .sf { /* Style for even index */
+            background-color: #e0f7fa;
+        }
+        .fs { /* Style for odd index */
+            background-color: #fce4ec;
+        }
     </style>
 </head>
 <body>
@@ -39,24 +57,17 @@
     </header>
 
     <section class="buttons" id="roomButtonsContainer">
-         <p class="loading-message">Loading rooms...</p>
+        <p class="loading-message">Loading rooms...</p>
     </section>
 
     <footer>
         <p>Contact us: support@asknfix.com | Phone: +7397247862<br><hr>
-           AskNFix is an innovative web application designed to streamline record-keeping and issue resolution for students and administrators. Whether it’s managing hostel accommodations, college records, or tracking KP appliances, this platform ensures seamless operations and effective communication</p>
+            AskNFix is an innovative web application designed to streamline record-keeping and issue resolution for students and administrators. Whether it’s managing hostel accommodations, college records, or tracking KP appliances, this platform ensures seamless operations and effective communication</p>
     </footer>
 
     <script>
         function toggleMenu() {
             document.querySelector(".nav-links").classList.toggle("show");
-        }
-
-        // Function to store selected room number before navigating
-        function f1(roomno) {
-            console.log("Storing room number for KP query:", roomno);
-            localStorage.setItem("kproomno", roomno);
-            // Note: Actual navigation to kpquery.html happens because of the link's href
         }
 
         // Function to handle logout
@@ -121,13 +132,30 @@
                 }
 
                 // Generate buttons for each room fetched
-                result.rooms.forEach((roomno, index) => { // Added index for potential alternating styles
+                result.rooms.forEach((roomno, index) => {
                     const link = document.createElement('a');
                     link.href = 'kpquery.html'; // Link navigates to the query page
 
-                    // Add click listener to store room number *before* navigation
-                    link.addEventListener('click', () => {
-                       f1(roomno);
+                    // Add click listener to fetch appliances and navigate
+                    link.addEventListener('click', async (event) => {
+                        event.preventDefault(); // Prevent default navigation
+
+                        try {
+                            const applianceResponse = await fetch(`/getKpAppliances/${roomno}`);
+                            const applianceData = await applianceResponse.json();
+
+                            if (applianceData.success) {
+                                localStorage.setItem('kpAppliances', JSON.stringify(applianceData.appliances));
+                                localStorage.setItem('kproomno', roomno);
+                                window.location.href = 'kpquery.html';
+                            } else {
+                                alert(applianceData.message || 'Failed to fetch appliances for this room.');
+                                console.error('Failed to fetch KP appliances:', applianceData);
+                            }
+                        } catch (error) {
+                            console.error('Error fetching KP appliances:', error);
+                            alert('An error occurred while fetching appliances.');
+                        }
                     });
 
                     const button = document.createElement('button');
@@ -154,20 +182,19 @@
 
             // Setup Home link redirection based on user status
             if (homeLink) {
-                 homeLink.addEventListener("click", function(event) {
-                     event.preventDefault(); // Prevent default link behavior immediately
-                     // Redirect based on stored user status
-                     if (user1 && user1.residing_status === "Hosteller") {
-                         window.location.href = "Homepage.html";
-                     } else {
-                         // Assume non-hosteller or missing status goes to Homepage1
-                         window.location.href = "Homepage1.html";
-                     }
-                 });
-             } else {
-                  console.error("Home link (.hreff) not found");
-             }
-
+                homeLink.addEventListener("click", function(event) {
+                    event.preventDefault(); // Prevent default link behavior immediately
+                    // Redirect based on stored user status
+                    if (user1 && user1.residing_status === "Hosteller") {
+                        window.location.href = "Homepage.html";
+                    } else {
+                        // Assume non-hosteller or missing status goes to Homepage1
+                        window.location.href = "Homepage1.html";
+                    }
+                });
+            } else {
+                console.error("Home link (.hreff) not found");
+            }
 
             // Fetch and display the dynamic room buttons
             fetchAndDisplayRooms();
