@@ -1,5 +1,3 @@
-// server.js (Updated)
-
 const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
@@ -619,6 +617,50 @@ app.get("/api/rooms/kp4f", async (req, res) => { // kp4f = KP Fourth Floor
     }
 });
 
+app.get('/getKpAppliances/:roomno', async (req, res) => {
+    const roomno = req.params.roomno;
+    const promisePool = db.promise(); // Get the promise pool
+
+    try {
+        const applianceQuery = `
+            SELECT a.appliance_id, a.name, ra.count AS count
+            FROM room_appliance ra
+            JOIN appliances a ON ra.appliance_id = a.appliance_id
+            WHERE ra.roomno = ?`;
+        const [totalAppliances] = await promisePool.query(applianceQuery, [roomno]);
+
+        const reportedCountsSql = `
+            SELECT qa.appliance_id, SUM(qa.count) as reported_count
+            FROM query q
+            JOIN query_appliances qa ON q.QUERY_ID = qa.query_id
+            WHERE q.roomno = ? AND q.status = 'not done'
+            GROUP BY qa.appliance_id;`;
+        const [reportedResults] = await promisePool.query(reportedCountsSql, [roomno]);
+
+        const reportedCountsMap = {};
+        if (Array.isArray(reportedResults)) {
+            reportedResults.forEach(row => {
+                reportedCountsMap[row.appliance_id] = row.reported_count;
+            });
+        }
+
+        const enhancedAppliances = (Array.isArray(totalAppliances) ? totalAppliances : []).map(app => {
+            const reportedCount = reportedCountsMap[app.appliance_id] || 0;
+            return {
+                appliance_id: app.appliance_id,
+                name: app.name,
+                count: app.count,
+                reportedCount: reportedCount
+            };
+        });
+
+        res.json({ success: true, appliances: enhancedAppliances });
+
+    } catch (error) {
+        console.error(`❌ Error fetching enhanced appliances for KP room ${roomno}:`, error);
+        res.status(500).json({ success: false, message: 'Failed to fetch KP appliances.' });
+    }
+});
 
 // (Keep /logout route here)
 app.post("/logout", (req, res) => {
