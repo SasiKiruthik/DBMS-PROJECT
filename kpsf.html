@@ -53,7 +53,7 @@
     </header>
 
     <section class="buttons" id="roomButtonsContainer">
-         <p class="loading-message">Loading rooms...</p>
+            <p class="loading-message">Loading rooms...</p>
     </section>
 
     <footer>
@@ -62,40 +62,35 @@
     </footer>
 
     <script>
-        // --- Keep existing toggleMenu, f1, logout functions ---
+        // --- Keep existing toggleMenu and logout functions ---
         function toggleMenu() {
             document.querySelector(".nav-links").classList.toggle("show");
         }
 
-        function f1(roomno) {
-            console.log("Storing room number for KP query:", roomno);
-            localStorage.setItem("kproomno", roomno);
-        }
-
         function logout(event) {
-             event.preventDefault();
-             console.log("Logout initiated...");
-             fetch('/logout', { method: 'POST', headers: {'Content-Type': 'application/json'} })
-             .then(response => {
-                 if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
-                 return response.json();
-             })
-             .then(data => {
-                 if (data.success) {
-                     alert(data.message || 'Logout successful!');
-                     localStorage.removeItem("user");
-                     localStorage.removeItem("kproomno");
-                     window.location.href = 'login.html';
-                 } else {
-                     alert(data.message || 'Logout failed.');
-                     console.error('Logout failed:', data.message);
-                 }
-             })
-             .catch(error => {
-                 console.error('Error during logout:', error);
-                 alert(`An error occurred during logout: ${error.message}`);
-             });
-         }
+            event.preventDefault();
+            console.log("Logout initiated...");
+            fetch('/logout', { method: 'POST', headers: {'Content-Type': 'application/json'} })
+            .then(response => {
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Logout successful!');
+                    localStorage.removeItem("user");
+                    localStorage.removeItem("kproomno");
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.message || 'Logout failed.');
+                    console.error('Logout failed:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error during logout:', error);
+                alert(`An error occurred during logout: ${error.message}`);
+            });
+        }
 
         // --- NEW: Function to fetch and display rooms for Second Floor ---
         async function fetchAndDisplayRooms() {
@@ -133,7 +128,28 @@
                 result.rooms.forEach((roomno, index) => {
                     const link = document.createElement('a');
                     link.href = 'kpquery.html';
-                    link.addEventListener('click', () => { f1(roomno); });
+
+                    // Add click listener to fetch appliances and navigate
+                    link.addEventListener('click', async (event) => {
+                        event.preventDefault(); // Prevent default navigation
+
+                        try {
+                            const applianceResponse = await fetch(`/getKpAppliances/${roomno}`);
+                            const applianceData = await applianceResponse.json();
+
+                            if (applianceData.success) {
+                                localStorage.setItem('kpAppliances', JSON.stringify(applianceData.appliances));
+                                localStorage.setItem('kproomno', roomno);
+                                window.location.href = 'kpquery.html';
+                            } else {
+                                alert(applianceData.message || 'Failed to fetch appliances for this room.');
+                                console.error('Failed to fetch KP appliances:', applianceData);
+                            }
+                        } catch (error) {
+                            console.error('Error fetching KP appliances:', error);
+                            alert('An error occurred while fetching appliances.');
+                        }
+                    });
 
                     const button = document.createElement('button');
                     button.classList.add('large-btn');
@@ -158,17 +174,17 @@
 
             // Setup Home link redirection
             if (homeLink) {
-                 homeLink.addEventListener("click", function(event) {
-                     event.preventDefault();
-                     if (user1 && user1.residing_status === "Hosteller") {
-                         window.location.href = "Homepage.html";
-                     } else {
-                         window.location.href = "Homepage1.html";
-                     }
-                 });
-             } else {
-                  console.error("Home link (.hreff) not found");
-             }
+                homeLink.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    if (user1 && user1.residing_status === "Hosteller") {
+                        window.location.href = "Homepage.html";
+                    } else {
+                        window.location.href = "Homepage1.html";
+                    }
+                });
+            } else {
+                console.error("Home link (.hreff) not found");
+            }
 
             // Fetch and display the dynamic room buttons for the second floor
             fetchAndDisplayRooms();
